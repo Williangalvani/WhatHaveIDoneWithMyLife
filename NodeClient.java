@@ -40,7 +40,7 @@ public class NodeClient implements Runnable{
 			return true;
 			
 		} catch (NotFound | org.omg.CORBA.COMM_FAILURE e) {
-			System.out.println("client: failed at node"+i);
+			System.out.println("client: accessing node"+i+", assuming the node is not online.");
 			return false;
 		} catch (CannotProceed e) {
 			// TODO Auto-generated catch block
@@ -63,6 +63,8 @@ public class NodeClient implements Runnable{
 			
 			while( !checkIfRemotesExist() )
 			{
+				System.out.println("Looks like some nodes are still offline");
+				System.out.println("retrying in 1s");
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
