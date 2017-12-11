@@ -1,0 +1,4 @@
+interface Node{
+	void ask(in long asker, in long timestamp);
+    void release(in long sender, in long timestamp);
+};
