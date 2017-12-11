@@ -11,22 +11,28 @@ public class Node {
 	static NodeClient client;
 	static NodeServer server;
 	
-	static int[] voters;
+	static int[] voters = {0, 0};
 	static int replies;
 	static states state;
 	static Boolean voted = false;
 	static int nodeId;
 	
 	static Queue requestsQueue = new LinkedList();
+	
+	static LamportTimestamp lamport = new LamportTimestamp(nodeId);
 
 	private static void request(int voter)
 	{
-		client.request(voter);
+		int timestamp = lamport.getNextTimestamp();
+		System.out.println(""+nodeId + ">>request>>" + voter + ":t" + timestamp);
+		client.request(voter, timestamp);
 	}
 	
 	private static void release(int voter)
 	{
-		client.release(voter);
+		int timestamp = lamport.getNextTimestamp();
+		System.out.println(""+nodeId + ">>release>>" + voter + ":t" + timestamp);
+		client.release(nodeId, voter, timestamp);
 	}
 	
 	public static void main(String args[	]) {
@@ -54,9 +60,22 @@ public class Node {
 
 		
 		voters[0] = nodeId; 
-		voters[1] = ((nodeId+1) % 3)+1;
+		voters[1] = ((nodeId) % 3)+1;
 		replies = 0;
 		state = states.RELEASED;
+		
+		while (!client.ready)
+		{
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		System.out.println("STARTING!");
+		System.out.println("my peers are " + voters[0] + " and " + voters[1]);
 		
 		
 		while(true)
@@ -80,7 +99,7 @@ public class Node {
 			ler.nextLine(); // bloqueio no scanner esperando por qualquer toque no teclado
 			System.out.println("releasing da requisição "); 
 			state = states.RELEASED;
-		
+			replies = 0;
 			for (int voter : voters)
 			{
 				release(voter);
@@ -91,10 +110,13 @@ public class Node {
 	}
 
 	public static void onRequest(int asker, int timestamp) {
+		System.out.println("got request from " + asker + " with timestamp " + timestamp);
 		if ((state != states.HELD) && !voted)
 		{
-			if ((state==states.RELEASED) || (state==states.WANTED && getTimestamp() > timestamp))
+			if ((state==states.RELEASED) || (state==states.WANTED && lamport.getTimestamp() > timestamp))
 			{
+				lamport.update(timestamp);
+				
 				reply(asker);
 				voted = true;
 			}else
@@ -105,20 +127,32 @@ public class Node {
 		{
 			requestsQueue.add(asker);
 		}
+		lamport.update(timestamp);
 		
 	}
 
-	public static void onRelease(int sender) {
+	public static void onRelease(int sender, int timestamp) {
+		System.out.println(""+nodeId + "<<release<<" + sender + ":t" + timestamp);
+		lamport.update(timestamp);
 		if(requestsQueue.size() != 0)
 		{
 			reply((int)requestsQueue.remove());
+			voted = true;
 		}
 		
 	}
 	
 	public static void reply(int node)
 	{
-		client.reply(nodeId);
+		int timestamp = lamport.getNextTimestamp();
+		System.out.println(""+nodeId + ">>reply>>" + node + ":t" + timestamp);
+		client.reply(nodeId,node, timestamp);
+		
+	}
+
+	public static void onReply(int sender, int timestamp) {
+		System.out.println(""+nodeId + "<<reply<<" + sender + ":t" + timestamp);
+		replies++;
 		
 	}
 }

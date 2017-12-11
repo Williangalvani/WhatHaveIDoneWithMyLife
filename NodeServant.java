@@ -16,16 +16,10 @@ class NodeServant extends NodePOA{
 
 	@Override
 	public void ask(int asker, int timestamp) {
-		System.out.println("Servant: recebeu pedido");
 		Node.onRequest(asker, timestamp);
 		
 	}
 
-	@Override
-	public void reply() {
-		System.out.println("Servant: recebeu reply");
-		
-	}
 	@Override
 	public void alive() {
 	System.out.println("Servant: am alive");
@@ -33,8 +27,14 @@ class NodeServant extends NodePOA{
 }
 
 	@Override
-	public void release(int sender) {
-		Node.onRelease(int sender);
+	public void release(int sender, int timestamp) {
+		Node.onRelease(sender, timestamp);
+		
+	}
+
+	@Override
+	public void reply(int sender, int timestamp) {
+		Node.onReply(sender, timestamp);
 		
 	}
 }

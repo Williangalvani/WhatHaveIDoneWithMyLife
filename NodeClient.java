@@ -15,6 +15,7 @@ public class NodeClient implements Runnable{
 	NamingContext namingContext;
 	Node[] node = {null, null, null, null};
 	private int nodeId;
+	public Boolean ready = false;
 	
 	
 	public NodeClient(String[] args, int nodeId){
@@ -69,32 +70,40 @@ public class NodeClient implements Runnable{
 					e.printStackTrace();
 				}
 			}
+
+			
 			
 			for(int i=1; i<4; i++)
 			{
 				NameComponent[] path= {new NameComponent("node"+i, "Object")};
 				node[i] = NodeHelper.narrow(namingContext.resolve(path));
 				System.out.println("client: node"+i + ": success");
-			}
+				System.out.println(node[i]);
+				}
 			
-			
-			
+			Thread.sleep(1000);
+			ready = true;
 		
-		} catch (org.omg.CORBA.ORBPackage.InvalidName | NotFound | CannotProceed | InvalidName e) {
+		} catch (org.omg.CORBA.ORBPackage.InvalidName | NotFound | CannotProceed | InvalidName | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 	}
 
-	public void request(int voter) {
-		node[voter].ask(nodeId, timestamp);
+	public void request(int voter, int timestamp) {
+		System.out.println(voter);
+		node[voter].ask(nodeId, timestamp);	
 		
 	}
 
-	public void release(int sender, int receiver) {
-		node[receiver].release(sender);
+	public void release(int sender, int receiver, int timestamp) {
+		node[receiver].release(sender, timestamp);
 		
+	}
+	
+	public void reply(int sender, int receiver, int timestamp) {
+		node[receiver].reply(sender, timestamp);
 	}
 
 }
