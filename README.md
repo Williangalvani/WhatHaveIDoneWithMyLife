@@ -2,7 +2,20 @@
 
 ## Usage
 
+Open orbd
+
+Compile eveything
+
     javac *.java
-    java Node 1
+
+Then run each node on it's own window
     
-nodes 2 and 3 should be opened on other terminals.   
+    java Node 1
+.
+
+    java Node 2
+.
+
+    java Node 3
+
+Now press Enter on each window like a madman.
