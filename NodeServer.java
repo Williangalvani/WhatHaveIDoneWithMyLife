@@ -1,4 +1,7 @@
 import org.omg.CosNaming.*;
+
+import java.util.Properties;
+
 //import org.omg.CosNaming.NamingContextPackage.*;
 import org.omg.CORBA.*;
 import org.omg.PortableServer.*;
@@ -8,10 +11,13 @@ import org.omg.PortableServer.*;
 public class NodeServer implements Runnable{ 
 	private String[] args;
 	private Integer processId=2;
-	
-	public NodeServer(String[] args, int nodeId){ 
+	private String host;
+	private ORB orb;
+
+	public NodeServer(String[] args, int nodeId, String host){ 
 		this.args = args;
 		this.processId = nodeId;
+		this.host = host;
 	}
 
 	public void batata()
@@ -25,7 +31,11 @@ public class NodeServer implements Runnable{
 			System.out.println("Server: iniciando ORB no servidor");
 			// create and initialize the ORB
 
-			ORB orb = ORB.init(args,null);
+			Properties props = new Properties();
+			props.put("org.omg.CORBA.OrbinitialHost",host);
+			
+			orb = ORB.init(args	, props);
+			
 
 			// get reference to rootpoa & activate the POAManager
             POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));

@@ -6,6 +6,8 @@ import org.omg.CosNaming.NamingContextPackage.NotFound;
 import idl.Node;
 import idl.NodeHelper;
 
+import java.util.Properties;
+
 import org.omg.CORBA.*;
 public class NodeClient implements Runnable{ 
 
@@ -16,11 +18,13 @@ public class NodeClient implements Runnable{
 	Node[] node = {null, null, null, null};
 	private int nodeId;
 	public Boolean ready = false;
+	String host = "";
 	
 	
-	public NodeClient(String[] args, int nodeId){
+	public NodeClient(String[] args, int nodeId, String host){
 		this.args = args;
 		this.nodeId = nodeId;
+		this.host = host;
 	}
 	
 	private Boolean checkIfRemotesExist()
@@ -56,7 +60,10 @@ public class NodeClient implements Runnable{
 	public void run() {
 		try {
 			System.out.println(args);
-			orb = ORB.init(args, null);
+			Properties props = new Properties();
+			props.put("org.omg.CORBA.OrbinitialHost",host);
+			
+			orb = ORB.init(args	, props);
 			
 			objRef = orb.resolve_initial_references("NameService");
 			namingContext = NamingContextHelper.narrow(objRef);

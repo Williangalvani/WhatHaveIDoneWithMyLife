@@ -16,6 +16,7 @@ public class Node {
 	static states state;
 	static Boolean voted = false;
 	static int nodeId;
+	static String host = "localhost";
 	
 	static Queue requestsQueue = new LinkedList();
 	
@@ -47,13 +48,19 @@ public class Node {
 		        System.exit(1);
 		    }
 		}
+		if (args.length > 1) {
+		   host = args[1];
+		}else
+		{
+			host = "localhost";
+		}
 		
 		
-		server = new NodeServer(args, nodeId);
+		server = new NodeServer(args, nodeId, host);
 		Thread tserver = new Thread(server);
 		tserver.start();
 		
-		client = new NodeClient(args, nodeId);
+		client = new NodeClient(args, nodeId, host);
 		Thread tclient = new Thread(client);
 		tclient.start();
 		
